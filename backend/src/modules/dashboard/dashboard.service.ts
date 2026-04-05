@@ -21,10 +21,11 @@ export async function getOverview(query: {
 }) {
   const now = new Date()
   const defaultFrom = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+  const toLimit = query.to ? (endOfDay(query.to) < now ? endOfDay(query.to) : now) : now
   const rangeFilter = {
     occurredAt: {
       $gte: startOfDay(query.from ?? defaultFrom),
-      $lte: endOfDay(query.to ?? now),
+      $lte: toLimit,
     },
   }
 

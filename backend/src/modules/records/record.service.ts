@@ -86,16 +86,17 @@ export async function listRecords(query: {
   sortBy: 'occurredAt' | 'amount' | 'createdAt'
   sortOrder: 'asc' | 'desc'
 }) {
+  const now = new Date()
   const filter: Record<string, unknown> = { isDeleted: false }
 
   if (query.type) filter.type = query.type
   if (query.category) filter.category = query.category
   if (query.search) filter.notes = { $regex: query.search, $options: 'i' }
-  if (query.from || query.to) {
-    filter.occurredAt = {
-      ...(query.from ? { $gte: query.from } : {}),
-      ...(query.to ? { $lte: query.to } : {}),
-    }
+
+  const toDate = query.to && query.to < now ? query.to : now
+  filter.occurredAt = {
+    ...(query.from ? { $gte: query.from } : {}),
+    $lte: toDate,
   }
 
   const sortDirection = query.sortOrder === 'asc' ? 1 : -1
